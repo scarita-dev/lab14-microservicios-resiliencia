@@ -1,0 +1,67 @@
+EXTRACTOS DE CONSOLA — LABORATORIO 14 (Config Server y Resiliencia)
+===================================================================
+
+1) Circuit Breaker: producto-service -> categoria-service
+---------------------------------------------------------
+Con categoria-service activo:
+  Llamando a categoria-service...
+  Hibernate: select p1_0.id,p1_0.categoria_id,p1_0.nombre,p1_0.precio,p1_0.stock from producto p1_0
+  Llamando a categoria-service...
+
+Tras detener categoria-service:
+  Fallback ejecutado: Connection refused: getsockopt executing GET http://categoria-service/api/categorias/1
+  Respuesta HTTP 200: "nombre": "Categoría temporal no disponible"
+
+
+2) Actividad 3: cliente-service -> pedido-service
+--------------------------------------------------
+Con pedido-service activo:
+  Llamando a pedido-service...
+
+Tras detener pedido-service:
+  Circuit Breaker activado (cliente -> pedido): Connection refused: getsockopt
+  Respuesta HTTP 200: {"id":1,"total":0}  (fallback)
+
+
+3) Actividad 3: pedido-service -> producto-service
+---------------------------------------------------
+Con producto-service activo:
+  Llamando a producto-service...
+
+Tras detener producto-service:
+  Fallback ejecutado (Bulkhead producto): Connection refused: getsockopt executing GET http://producto-service/api/productos/1
+  Respuesta HTTP 200: "producto": {"nombre": "Producto temporal no disponible"}
+
+
+4) Retry Pattern: pedido-service -> cliente-service
+----------------------------------------------------
+Se detuvo cliente-service y se consulto GET /api/pedidos:
+
+  Llamando a cliente-service...
+  Llamando a cliente-service...
+  Llamando a cliente-service...
+  Fallback ejecutado (Retry cliente): Connection refused: getsockopt executing GET http://cliente-service/api/clientes/1
+  Llamando a cliente-service...
+  Llamando a cliente-service...
+  Llamando a cliente-service...
+  Fallback ejecutado (Retry cliente): Connection refused: getsockopt executing GET http://cliente-service/api/clientes/2
+
+(maxAttempts = 3, waitDuration = 2s -> tres intentos por pedido antes del fallback)
+
+
+5) Bulkhead Pattern: pedido-service -> producto-service
+--------------------------------------------------------
+Demora simulada en producto-service: GET /api/productos/bulkhead/1 = 10.1 s
+Demora simulada en cliente-service:  GET /api/clientes/slow/1     = 5.0 s
+
+Cuatro peticiones concurrentes a GET /api/pedidos/bulkhead:
+
+  Llamando a producto-service (lento)...
+  Llamando a producto-service (lento)...
+  Fallback ejecutado (Bulkhead producto): Bulkhead 'productoBulkhead' is full and does not permit further calls
+  Fallback ejecutado (Bulkhead producto): Bulkhead 'productoBulkhead' is full and does not permit further calls
+  Llamando a producto-service (lento)...
+  Llamando a producto-service (lento)...
+
+(maxConcurrentCalls = 2, maxWaitDuration = 1s -> las peticiones excedentes
+reciben fallback inmediato mientras las dos primeras esperan ~20 s)
