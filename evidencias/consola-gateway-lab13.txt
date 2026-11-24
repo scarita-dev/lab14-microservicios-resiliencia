@@ -1,0 +1,50 @@
+﻿LABORATORIO 13 - PRUEBAS POR EL API GATEWAY
+Fecha: 2026-11-23 19:51:16
+Gateway: http://localhost:8080
+
+=== SERVICIOS REGISTRADOS EN EUREKA ===
+CLIENTE-SERVICE | DESKTOP-3CHUVMT:cliente-service:8084 | UP
+PEDIDO-SERVICE | DESKTOP-3CHUVMT:pedido-service:8085 | UP
+PRODUCTO-SERVICE | DESKTOP-3CHUVMT:producto-service:8083 | UP
+GATEWAY-SERVER | DESKTOP-3CHUVMT:gateway-server:8080 | UP
+CATEGORIA-SERVICE | DESKTOP-3CHUVMT:categoria-service:8082 | UP
+
+=== GET http://localhost:8080/api/categorias ===
+HTTP/1.1 200 OK
+transfer-encoding: chunked
+Content-Type: application/json
+Date: Tue, 24 Nov 2026 00:51:16 GMT
+
+[{"id":1,"nombre":"Tecnología","estado":true},{"id":2,"nombre":"Hogar","estado":true},{"id":3,"nombre":"Deportes","estado":true}]
+
+=== GET http://localhost:8080/api/productos ===
+HTTP/1.1 200 OK
+transfer-encoding: chunked
+Content-Type: application/json
+Date: Tue, 24 Nov 2026 00:51:16 GMT
+
+[{"id":1,"nombre":"Laptop","precio":2500.00,"stock":10,"categoriaId":1,"categoria":{"id":1,"nombre":"Tecnología","estado":true}},{"id":2,"nombre":"Mouse","precio":80.00,"stock":50,"categoriaId":1,"categoria":{"id":1,"nombre":"Tecnología","estado":true}},{"id":3,"nombre":"Silla","precio":450.00,"stock":15,"categoriaId":2,"categoria":{"id":2,"nombre":"Hogar","estado":true}}]
+
+=== GET http://localhost:8080/api/clientes ===
+HTTP/1.1 200 OK
+transfer-encoding: chunked
+Content-Type: application/json
+Date: Tue, 24 Nov 2026 00:51:16 GMT
+
+[{"id":1,"nombre":"Juan Pérez","email":"juan.perez@example.com","telefono":"987654321"},{"id":2,"nombre":"María Gómez","email":"maria.gomez@example.com","telefono":"912345678"}]
+
+=== GET http://localhost:8080/api/pedidos ===
+HTTP/1.1 200 OK
+transfer-encoding: chunked
+Content-Type: application/json
+Date: Tue, 24 Nov 2026 00:51:17 GMT
+
+[{"id":1,"clienteId":1,"productoId":1,"cantidad":1,"total":2500.00,"fecha":"2026-11-23T19:48:40.638686","cliente":{"id":1,"nombre":"Juan Pérez","email":"juan.perez@example.com","telefono":"987654321"},"producto":{"id":1,"nombre":"Laptop","precio":2500.00,"stock":10,"categoriaId":1,"categoria":{"id":1,"nombre":"Tecnología","estado":true}}},{"id":2,"clienteId":2,"productoId":2,"cantidad":2,"total":160.00,"fecha":"2026-11-23T19:48:40.773623","cliente":{"id":2,"nombre":"María Gómez","email":"maria.gomez@example.com","telefono":"912345678"},"producto":{"id":2,"nombre":"Mouse","precio":80.00,"stock":50,"categoriaId":1,"categoria":{"id":1,"nombre":"Tecnología","estado":true}}}]
+
+=== GET http://localhost:8080/actuator/health ===
+HTTP/1.1 200 OK
+Content-Type: application/vnd.spring-boot.actuator.v3+json
+Content-Length: 15
+
+{"status":"UP"}
+
